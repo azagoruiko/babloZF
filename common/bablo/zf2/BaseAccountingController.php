@@ -18,11 +18,11 @@ use Zend\Session\Container;
  * @author andrii
  */
 class BaseAccountingController extends AbstractActionController {
-    protected $session;
+    /*protected $session;
     
     function __construct() {
         $this->session = new Container();
-    }
+    }*/
     
     /**
      * 

@@ -23,11 +23,11 @@ class Module
         $eventManager        = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
-        $this->initSession(array(
+        /*$this->initSession(array(
             'remember_me_seconds' => 3600,
             'use_cookies' => true,
             'cookie_httponly' => true,
-        ));
+        ));*/
     }
 
     public function initSession($config)

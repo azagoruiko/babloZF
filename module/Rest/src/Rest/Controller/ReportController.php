@@ -20,13 +20,22 @@ class ReportController extends BaseAccountingController
         $sm = $this->getServiceLocator();
         return $sm->get('Rest\service\ExpenceService');
     }
+    
+    /**
+     * 
+     * @return \Zend\Authentication\AuthenticationService
+     */
+    private function getAuthService() {
+        $sm = $this->getServiceLocator();
+        return $sm->get('AuthService');
+    }
 
     function monthlyIncomeAction() {
         $view = new JsonModel();
         $month = date("m");
         $year = date("Y");
         $view->updates = $this->getIncomeService()->getUpdates(
-                $this->session['id'], 
+                $this->getAuthService()->getIdentity(), 
                 0,
                 $month, $year);
         return $view;
@@ -34,7 +43,7 @@ class ReportController extends BaseAccountingController
     
     function revenue12MonthsAction() {
         $view = new JsonModel();
-        $view->revenue = $this->getIncomeService()->getRevenueBrokenByMonth ($this->session['id']);
+        $view->revenue = $this->getIncomeService()->getRevenueBrokenByMonth ($this->getAuthService()->getIdentity());
         
         return $view;
     }
@@ -42,17 +51,16 @@ class ReportController extends BaseAccountingController
     function annualBalanceAction() {
         $view = new JsonModel();
         $year = date("Y");
-        $view->updates = $this->getIncomeService()->getAnnualBalance ($this->session['id'], $year);
+        $view->updates = $this->getIncomeService()->getAnnualBalance ($this->getAuthService()->getIdentity(), $year);
         
         return $view;
     }
     
     function monthlyExpenceAction() {
         $view = new JsonModel();
-        sleep(3);
         $month = date("m");
         $year = date("Y");
-        $view->updates = $this->getExpenceService()->findAll($this->session['id'], $month, $year);
+        $view->updates = $this->getExpenceService()->findAll($this->getAuthService()->getIdentity(), $month, $year);
         return $view;
     }
     
@@ -60,7 +68,7 @@ class ReportController extends BaseAccountingController
         $view = new JsonModel();
         $dates = $this->getSelectedYearMonth();
         $view->updates = $this->getIncomeService()->getUpdates(
-                $this->session['id'], 
+                $this->getAuthService()->getIdentity(), 
                 $this->params()->fromPost('since'),
                 $dates[0], $dates[1]);
         $maxId = $this->params()->fromPost('since');

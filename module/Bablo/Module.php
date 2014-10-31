@@ -1,7 +1,9 @@
 <?php
 namespace Bablo;
 
+use bablo\dao\MysqlCurrencyDAO;
 use bablo\dao\MysqlUserDAO;
+use Bablo\Service\AuthUserService;
 use PDO;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
@@ -21,11 +23,11 @@ class Module
         $eventManager        = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
-        $this->initSession(array(
+        /*$this->initSession(array(
             'remember_me_seconds' => 3600,
             'use_cookies' => true,
             'cookie_httponly' => true,
-        ));
+        ));*/
     }
 
     public function initSession($config)
@@ -56,14 +58,24 @@ class Module
                 'Bablo\service\CurrencyService' =>  function($sm) {
                     return $sm->get('Bablo\dao\CurrencyDAO');
                 },
+                'Bablo\service\AuthSession' => function($sm) {
+                    $srv = new Service\AuthStorage();
+                    return $srv;
+                },
                 'Bablo\dao\CurrencyDAO' =>  function($sm) {
                     $conn = $sm->get('MySQLConnection');
-                    $dao = new \bablo\dao\MysqlCurrencyDAO($conn);
+                    $dao = new MysqlCurrencyDAO($conn);
                     return $dao;
                 },
+                        
+                'AuthService' => function($sm) {
+                    return new \Zend\Authentication\AuthenticationService(
+                           $sm->get('Bablo\service\AuthSession'), 
+                           $sm->get('Bablo\dao\UserService')); 
+                }, 
                 'Bablo\dao\UserService' =>  function($sm) {
                     $dao = $sm->get('Bablo\dao\UserDAO');
-                    $srv = new \bablo\service\UserServiceImpl($dao);
+                    $srv = new AuthUserService($dao);
                     return $srv;
                 },
                 'Bablo\dao\UserDAO' =>  function($sm) {

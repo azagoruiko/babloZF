@@ -2,34 +2,45 @@
 
 namespace Bablo\Controller;
 
-use bablo\dao\MysqlUserDAO;
 use Bablo\Form\LoginForm;
+use Bablo\Service\AuthUserService;
+use Zend\Authentication\AuthenticationService;
+use Zend\Authentication\Result;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Session\Container;
 use Zend\View\Model\ViewModel;
 
 class IndexController extends AbstractActionController
 {
-    private $session;
+    //private $session;
     
-    function __construct() {
+    /*function __construct() {
         $this->session = new Container();
-    }
+    }*/
     
     /**
      * 
-     * @return MysqlUserDAO Description
+     * @return AuthUserService Description
      */
     private function getUserService() {
         $sm = $this->getServiceLocator();
         return $sm->get('Bablo\dao\UserService');
+    }
+    
+    /**
+     * 
+     * @return AuthenticationService Description
+     */
+    private function getAuthService() {
+        $sm = $this->getServiceLocator();
+        return $sm->get('AuthService');
     }
 
     public function indexAction()
     {
         $view = new ViewModel();
         $view->login = new LoginForm();
-        if (isset($this->session['id'])) {
+        if ($this->getAuthService()->hasIdentity()) {
             //return $this->redirect()->toRoute('dashboard');
             return $this->redirect()->toRoute('bablo/default', ['action' => 'dashboard', 'controller' => 'index']);
         } else {
@@ -39,20 +50,30 @@ class IndexController extends AbstractActionController
     }
     
     public function dashboardAction() {
-        $view = new ViewModel();
-        $view->user = $this->getUserService()->find($this->session['id']);
-        return $view;
+        if (!$this->getAuthService()->hasIdentity()) {
+            return $this->redirect()->toUrl('/');
+        } else {
+            $view = new ViewModel();
+            $id = $this->getAuthService()->getIdentity();
+            $view->user = $this->getUserService()->find($id);
+            return $view;
+        }
     }
     
     function loginAction() {
         $view = new ViewModel();
         $name = $this->params()->fromPost('name');
         $pass = $this->params()->fromPost('pass');
+        $service = $this->getAuthService();
+        $service->getAdapter()->setName($name);
+        $service->getAdapter()->setPass($pass);
         if (empty($name) && empty($pass)) {
             return $view;
         }
-        else if (FALSE !== ($view->user = $this->getUserService()->authorize($name, $pass))) {
-            $this->session['id'] = $view->user->getId();
+        $result = $service->authenticate();
+        
+        if ($result->getCode() === Result::SUCCESS) {
+            $this->getAuthService()->getStorage()->rememberMe();
             return $this->redirect()->toUrl('/');
         } else {
             $view->error = "Login failed! You're a hacker!";
@@ -61,7 +82,8 @@ class IndexController extends AbstractActionController
     }
     
     function logoutAction() {
-        $this->session['id'] = NULL;
+        $this->getAuthService()->getStorage()->forgetMe();
+        $this->getAuthService()->clearIdentity();
         return $this->redirect()->toUrl('/');
     }
 
