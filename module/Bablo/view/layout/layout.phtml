@@ -11,7 +11,7 @@
         <div class="container">
             <nav class="navbar navbar-inverse">
                 <div class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav">
+                    <!-- ul class="nav navbar-nav">
                         <li><a href="./">Главная</a></li>
                         <li><a href="?ctrl=user&action=showUser">Юзер</a></li>
                         <li><a href="/bablo/accounting/edit-income">Добавить бабла</a></li>
@@ -21,7 +21,11 @@
                         <li><a href="?ctrl=income&action=balance">Баланс</a></li>
                         <li><a href="?ctrl=currency&action=setRates">Курсы валют</a></li>
                         <li><a href="/bablo/index/logout">Выйти</a></li>
-                    </ul>
+                    </ul -->
+                    <?php 
+                    
+                    echo $this->navigation('navigation')->menu()->setUlClass('nav navbar-nav');
+                    ?>
                 </div>
             </nav>
         </div>

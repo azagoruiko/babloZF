@@ -17,12 +17,13 @@ class AccountingController extends BaseAccountingController
         $view = new ViewModel();
                 
         $view->message = '';
-        if (empty($this->session['id'])) {
+        $id = $this->getAuthService()->getIdentity();
+        if (empty($id)) {
             $view->message = 'you\'re not authorized, go away!';
             $view->incomes = [];
         } else {
             list($month, $year)=$this->getSelectedYearMonth();
-            $view->incomes = $this->getIncomeService()->findAll($this->session['id'], $month, $year);
+            $view->incomes = $this->getIncomeService()->findAll($id, $month, $year);
             $this->prepareMoneyReportForm($view);
         }
 

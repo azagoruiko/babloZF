@@ -16,19 +16,12 @@ class ReportController extends BaseAccountingController
      * 
      * @return ExpenceDAO Description
      */
-    private function getExpenceService() {
+    protected function getExpenceService() {
         $sm = $this->getServiceLocator();
         return $sm->get('Rest\service\ExpenceService');
     }
     
-    /**
-     * 
-     * @return \Zend\Authentication\AuthenticationService
-     */
-    private function getAuthService() {
-        $sm = $this->getServiceLocator();
-        return $sm->get('AuthService');
-    }
+    
 
     function monthlyIncomeAction() {
         $view = new JsonModel();

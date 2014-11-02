@@ -8,6 +8,36 @@
  */
 
 return array(
+    'navigation' => [
+        'default' => [
+            [
+                'label' => 'Главная',
+                'route' => 'home',
+                'resource' => 'mvc:Bablo\Controller\Index',
+            ],
+            [
+                'label' => 'Добавить бабла',
+                'route' => 'bablo/default',
+                'controller' => 'accounting',
+                'action' => 'edit-income',
+                'resource' => 'mvc:Bablo\Controller\Accounting',
+            ],
+            [
+                'label' => 'Бабло',
+                'route' => 'bablo/default',
+                'controller' => 'accounting',
+                'action' => 'income',
+                'resource' => 'mvc:Bablo\Controller\Accounting',
+            ],
+            [
+                'label' => 'Выход',
+                'route' => 'bablo/default',
+                'controller' => 'index',
+                'action' => 'logout',
+                'resource' => 'mvc:Bablo\Controller\Accounting',
+            ],
+        ],
+    ],
     'router' => array(
         'routes' => array(
             'home' => array(

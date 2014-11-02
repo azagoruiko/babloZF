@@ -40,8 +40,7 @@ class IndexController extends AbstractActionController
     {
         $view = new ViewModel();
         $view->login = new LoginForm();
-        if ($this->getAuthService()->hasIdentity()) {
-            //return $this->redirect()->toRoute('dashboard');
+        if ($this->getAuthService()->hasIdentity()) {       
             return $this->redirect()->toRoute('bablo/default', ['action' => 'dashboard', 'controller' => 'index']);
         } else {
             $view->user = null;

@@ -26,6 +26,15 @@ class BaseAccountingController extends AbstractActionController {
     
     /**
      * 
+     * @return \Zend\Authentication\AuthenticationService
+     */
+    protected function getAuthService() {
+        $sm = $this->getServiceLocator();
+        return $sm->get('AuthService');
+    }
+    
+    /**
+     * 
      * @return \bablo\dao\CurrencyDAO Description
      */
     protected function getCurrencyService() {

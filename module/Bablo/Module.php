@@ -5,8 +5,12 @@ use bablo\dao\MysqlCurrencyDAO;
 use bablo\dao\MysqlUserDAO;
 use Bablo\Service\AuthUserService;
 use PDO;
+use Zend\Authentication\AuthenticationService;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
+use Zend\Permissions\Acl\Acl;
+use Zend\Permissions\Acl\Resource\GenericResource;
+use Zend\Permissions\Acl\Role\GenericRole;
 use Zend\Session\Config\SessionConfig;
 use Zend\Session\Container;
 use Zend\Session\SessionManager;
@@ -23,13 +27,37 @@ class Module
         $eventManager        = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
+        
+        $eventManager->attach('route', function(MvcEvent $e){
+            $sm = $e->getApplication()->getServiceManager();
+            $acl = $sm->get('ACL');
+            \Zend\View\Helper\Navigation\AbstractHelper::setDefaultAcl($acl);
+        });
+        
+        $eventManager->attach('dispatch', function (MvcEvent $e) {
+            $sm = $e->getApplication()->getServiceManager();
+            $auth = $sm->get('AuthService');
+            $role = 'guest';
+            if ($auth->hasIdentity()) {
+                $role = 'user';   
+            }
+            \Zend\View\Helper\Navigation\AbstractHelper::setDefaultRole($role);
+            /**
+             * @var Acl
+             */
+            $acl = $sm->get('ACL');
+            $res = 'mvc:' . $e->getRouteMatch()->getParam('controller');
+            if (!$acl->isAllowed($role, $res)) {
+                die($res);
+            }
+        });
         /*$this->initSession(array(
             'remember_me_seconds' => 3600,
             'use_cookies' => true,
             'cookie_httponly' => true,
         ));*/
     }
-
+    
     public function initSession($config)
     {
         $sessionConfig = new SessionConfig();
@@ -69,7 +97,7 @@ class Module
                 },
                         
                 'AuthService' => function($sm) {
-                    return new \Zend\Authentication\AuthenticationService(
+                    return new AuthenticationService(
                            $sm->get('Bablo\service\AuthSession'), 
                            $sm->get('Bablo\dao\UserService')); 
                 }, 
@@ -85,6 +113,28 @@ class Module
                 },
                 'MySQLConnection' => function ($sm) {
                     return new PDO('mysql:host=localhost;dbname=' . 'bablo', 'bablo3', 'parol');
+                },
+                'navigation' => 'Zend\Navigation\Service\DefaultNavigationFactory',
+                
+                'ACL' => function ($sm) {
+                    $acl = new Acl();
+                    $acl->addRole(new GenericRole('guest'));
+                    $acl->addRole(new GenericRole('user', ['guest']));
+                    $acl->addRole(new GenericRole('admin'));
+
+                    $acl->addResource(new GenericResource('mvc:Bablo\Controller\Accounting'));
+                    $acl->addResource(new GenericResource('mvc:Bablo\Controller\Index'));
+                    $acl->addResource(new GenericResource('mvc:Rest\Controller\Report'));
+                    $acl->addResource(new GenericResource('mvc:Rest\Controller\Validate'));
+                    
+                    $acl->allow('guest', 'mvc:Bablo\Controller\Index');
+                    
+                    $acl->allow('user', 'mvc:Bablo\Controller\Index');
+                    $acl->allow('user', 'mvc:Bablo\Controller\Accounting');
+                    $acl->allow('user', 'mvc:Rest\Controller\Report');
+                    $acl->allow('user', 'mvc:Rest\Controller\Validate');
+                    
+                    return $acl;
                 },
         ));
     }
