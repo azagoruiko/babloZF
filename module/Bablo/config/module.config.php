@@ -139,6 +139,14 @@ return array(
     'console' => array(
         'router' => array(
             'routes' => array(
+                'user' => array(
+                    'options' => array(
+                        'route' => 'user <action> <param1> [<param2>]',
+                        'defaults' => array(
+                            'controller' => 'Bablo\Controller\Index',
+                        ),
+                    ),
+                ),
             ),
         ),
     ),

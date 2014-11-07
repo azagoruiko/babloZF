@@ -11,4 +11,5 @@ interface UserDAO extends DAO {
     //function find($id);
     function save(User $user);
     function findByNameAndPass($name, $pass);
+    function resetPassword($email, $pass);
 }

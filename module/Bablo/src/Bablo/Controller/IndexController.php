@@ -6,8 +6,8 @@ use Bablo\Form\LoginForm;
 use Bablo\Service\AuthUserService;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Result;
+use Zend\Math\Rand;
 use Zend\Mvc\Controller\AbstractActionController;
-use Zend\Session\Container;
 use Zend\View\Model\ViewModel;
 
 class IndexController extends AbstractActionController
@@ -49,14 +49,10 @@ class IndexController extends AbstractActionController
     }
     
     public function dashboardAction() {
-        if (!$this->getAuthService()->hasIdentity()) {
-            return $this->redirect()->toUrl('/');
-        } else {
-            $view = new ViewModel();
-            $id = $this->getAuthService()->getIdentity();
-            $view->user = $this->getUserService()->find($id);
-            return $view;
-        }
+        $view = new ViewModel();
+        $id = $this->getAuthService()->getIdentity();
+        $view->user = $this->getUserService()->find($id);
+        return $view;
     }
     
     function loginAction() {
@@ -84,6 +80,27 @@ class IndexController extends AbstractActionController
         $this->getAuthService()->getStorage()->forgetMe();
         $this->getAuthService()->clearIdentity();
         return $this->redirect()->toUrl('/');
+    }
+    
+    function userInfoAction() {
+        $id = $this->params()->fromRoute('param1');
+        $user = $this->getUserService()->find($id);
+        if ($user == null) {
+            echo "User not found\n";
+        } else {
+            echo $user->getEmail() . "\n";
+        }
+    }
+    
+    function resetPasswordAction() {
+        $email = $this->params()->fromRoute('param1');
+        $pass =  $this->params()->fromRoute('param2', Rand::getString(16));
+        $result = $this->getUserService()->resetPassword($email, $pass);
+        if ($result > 0) {
+            echo "Password set to $pass\n";
+        } else {
+            echo "User not found\n";
+        }
     }
 
 }

@@ -49,4 +49,13 @@ class User {
     function setPass($pass) {
         $this->password = $pass;
     }
+    public function getEmail() {
+        return $this->email;
+    }
+
+    public function setEmail($email) {
+        $this->email = $email;
+    }
+
+
 }

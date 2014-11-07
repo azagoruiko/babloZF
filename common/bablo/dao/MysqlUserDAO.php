@@ -37,7 +37,20 @@ class MysqlUserDAO implements UserDAO {
     }
 
     public function save(User $user) {
-        
+        $stmt = $this->mysql->prepare("UPDATE user set email=:email, name=:name, password=password(:pass)where id=:id");
+        $stmt->bindParam('email', $user->getEmail());
+        $stmt->bindParam('pass', $user->getPass());
+        $stmt->bindParam('name', $user->getName());
+        $stmt->bindParam('id', $user->getId);
+        return $stmt->execute();
+    }
+
+    public function resetPassword($email, $pass) {
+        $stmt = $this->mysql->prepare("UPDATE user set password=password(:pass) where email=:email");
+        $stmt->bindParam('email', $email);
+        $stmt->bindParam('pass', $pass);
+        $stmt->execute();
+        return $stmt->rowCount();
     }
 
 //put your code here

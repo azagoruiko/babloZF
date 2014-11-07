@@ -27,4 +27,8 @@ class UserServiceImpl implements UserService {
         return $this->userDAO->findByNameAndPass($name, $pass);
     }
 
+    public function resetPassword($email, $pass) {
+        return $this->userDAO->resetPassword($email, $pass);
+    }
+
 }

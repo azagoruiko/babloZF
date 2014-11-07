@@ -46,9 +46,18 @@ class Module
              * @var Acl
              */
             $acl = $sm->get('ACL');
-            $res = 'mvc:' . $e->getRouteMatch()->getParam('controller');
-            if (!$acl->isAllowed($role, $res)) {
-                die($res);
+            $resCtrl = 'mvc:' . $e->getRouteMatch()->getParam('controller');
+            $resAct = $resCtrl . ':' . $e->getRouteMatch()->getParam('action');
+            //if (php_sapi_name() !== 'cli' && !$acl->isAllowed($role, $resCtrl)) {
+            if (!($e->getRequest() instanceof \Zend\Console\Request) && !$acl->isAllowed($role, $resCtrl)) {
+                if (!($acl->hasResource($resAct) && $acl->isAllowed($role, $resAct))) {
+                    $url = $e->getRouter()->assemble([], ['name' => 'home']);
+                    $resp = $e->getResponse();
+                    $resp->getHeaders()->addHeaderLine("Location", $url);
+                    $resp->setStatusCode(302);
+                    $resp->sendHeaders();
+                    exit;
+                }
             }
         });
         /*$this->initSession(array(
@@ -124,10 +133,14 @@ class Module
 
                     $acl->addResource(new GenericResource('mvc:Bablo\Controller\Accounting'));
                     $acl->addResource(new GenericResource('mvc:Bablo\Controller\Index'));
+                    $acl->addResource(new GenericResource('mvc:Bablo\Controller\Index:index'));
+                    $acl->addResource(new GenericResource('mvc:Bablo\Controller\Index:dashboard'));
+                    $acl->addResource(new GenericResource('mvc:Bablo\Controller\Index:login'));
                     $acl->addResource(new GenericResource('mvc:Rest\Controller\Report'));
                     $acl->addResource(new GenericResource('mvc:Rest\Controller\Validate'));
                     
-                    $acl->allow('guest', 'mvc:Bablo\Controller\Index');
+                    $acl->allow('guest', 'mvc:Bablo\Controller\Index:index');
+                    $acl->allow('guest', 'mvc:Bablo\Controller\Index:login');
                     
                     $acl->allow('user', 'mvc:Bablo\Controller\Index');
                     $acl->allow('user', 'mvc:Bablo\Controller\Accounting');
