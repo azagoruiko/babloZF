@@ -1,6 +1,8 @@
 <html>
     <head>
-        <title>Здесь будет много баблища!!!!111</title>
+        <?php echo $this->headTitle(); ?>
+        <?php echo $this->headScript(); ?>
+        <?php echo $this->headStyle(); ?>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -11,19 +13,7 @@
         <div class="container">
             <nav class="navbar navbar-inverse">
                 <div class="collapse navbar-collapse">
-                    <!-- ul class="nav navbar-nav">
-                        <li><a href="./">Главная</a></li>
-                        <li><a href="?ctrl=user&action=showUser">Юзер</a></li>
-                        <li><a href="/bablo/accounting/edit-income">Добавить бабла</a></li>
-                        <li><a href="?ctrl=user&action=login">Войти</a></li>
-                        <li><a href="/bablo/accounting/income">Бабло</a></li>
-                        <li><a href="?ctrl=expence&action=expences">Траты</a></li>
-                        <li><a href="?ctrl=income&action=balance">Баланс</a></li>
-                        <li><a href="?ctrl=currency&action=setRates">Курсы валют</a></li>
-                        <li><a href="/bablo/index/logout">Выйти</a></li>
-                    </ul -->
-                    <?php 
-                    
+                    <?php                
                     echo $this->navigation('navigation')->menu()->setUlClass('nav navbar-nav');
                     ?>
                 </div>
@@ -41,5 +31,6 @@
         </div>
 
     </body>
+    <?php echo $this->inlineScript(); ?>
 </html>
 

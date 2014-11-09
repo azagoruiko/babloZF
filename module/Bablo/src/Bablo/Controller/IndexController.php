@@ -63,7 +63,7 @@ class IndexController extends AbstractActionController
         $service->getAdapter()->setName($name);
         $service->getAdapter()->setPass($pass);
         if (empty($name) && empty($pass)) {
-            return $view;
+            return $this->redirect()->toUrl('/');
         }
         $result = $service->authenticate();
         
@@ -72,7 +72,7 @@ class IndexController extends AbstractActionController
             return $this->redirect()->toUrl('/');
         } else {
             $view->error = "Login failed! You're a hacker!";
-            return $view;
+            return $this->redirect()->toUrl('/');
         }
     }
     

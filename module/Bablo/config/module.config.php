@@ -8,6 +8,11 @@
  */
 
 return array(
+    'view_helpers' => [
+        'invokables' => [
+            'summary' => '\Bablo\ViewHelper\SummaryHelper',
+        ],
+    ],
     'navigation' => [
         'default' => [
             [

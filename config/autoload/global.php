@@ -12,5 +12,16 @@
  */
 
 return array(
-    // ...
+    'db' => [
+        'driver' => 'Pdo',
+        'dsn' => 'mysql:host=localhost;dbname=bablo',
+        'driver_option' => [
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES\'UTF8\'',
+        ],
+    ],
+    'service_manager' => [
+        'factories' => [
+            'Zend\Db\Adapter\Adapter' => 'Zend\Db\Adapter\AdapterServiceFactory',
+        ],
+    ],
 );

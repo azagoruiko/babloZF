@@ -2,10 +2,13 @@
 namespace Bablo;
 
 use bablo\dao\MysqlCurrencyDAO;
-use bablo\dao\MysqlUserDAO;
+use bablo\model\User;
 use Bablo\Service\AuthUserService;
 use PDO;
 use Zend\Authentication\AuthenticationService;
+use Zend\Console\Request;
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\TableGateway\TableGateway;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Permissions\Acl\Acl;
@@ -14,6 +17,7 @@ use Zend\Permissions\Acl\Role\GenericRole;
 use Zend\Session\Config\SessionConfig;
 use Zend\Session\Container;
 use Zend\Session\SessionManager;
+use Zend\View\Helper\Navigation\AbstractHelper;
 
 class Module
 {
@@ -31,7 +35,7 @@ class Module
         $eventManager->attach('route', function(MvcEvent $e){
             $sm = $e->getApplication()->getServiceManager();
             $acl = $sm->get('ACL');
-            \Zend\View\Helper\Navigation\AbstractHelper::setDefaultAcl($acl);
+            AbstractHelper::setDefaultAcl($acl);
         });
         
         $eventManager->attach('dispatch', function (MvcEvent $e) {
@@ -41,7 +45,7 @@ class Module
             if ($auth->hasIdentity()) {
                 $role = 'user';   
             }
-            \Zend\View\Helper\Navigation\AbstractHelper::setDefaultRole($role);
+            AbstractHelper::setDefaultRole($role);
             /**
              * @var Acl
              */
@@ -49,7 +53,7 @@ class Module
             $resCtrl = 'mvc:' . $e->getRouteMatch()->getParam('controller');
             $resAct = $resCtrl . ':' . $e->getRouteMatch()->getParam('action');
             //if (php_sapi_name() !== 'cli' && !$acl->isAllowed($role, $resCtrl)) {
-            if (!($e->getRequest() instanceof \Zend\Console\Request) && !$acl->isAllowed($role, $resCtrl)) {
+            if (!($e->getRequest() instanceof Request) && !$acl->isAllowed($role, $resCtrl)) {
                 if (!($acl->hasResource($resAct) && $acl->isAllowed($role, $resAct))) {
                     $url = $e->getRouter()->assemble([], ['name' => 'home']);
                     $resp = $e->getResponse();
@@ -112,17 +116,31 @@ class Module
                 }, 
                 'Bablo\dao\UserService' =>  function($sm) {
                     $dao = $sm->get('Bablo\dao\UserDAO');
-                    $srv = new AuthUserService($dao);
+                    //$srv = new AuthUserService($dao);
+                    $srv = $dao;
                     return $srv;
                 },
                 'Bablo\dao\UserDAO' =>  function($sm) {
-                    $conn = $sm->get('MySQLConnection');
-                    $dao = new MysqlUserDAO($conn);
+                    //$conn = $sm->get('MySQLConnection');
+                    //$dao = new MysqlUserDAO($conn);
+                    $gw = $sm->get('Bablo\dao\UserTable');
+                    $dao = new Service\ZendMysqlUserService();
+                    $dao->setGw($gw);
                     return $dao;
                 },
+                
+                'Bablo\dao\UserTable' =>  function($sm) {
+                    $adapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultPrototype = new ResultSet();
+                    $resultPrototype->setArrayObjectPrototype(new User());
+                    return new TableGateway('user', $adapter, null, $resultPrototype);
+                },
+                
                 'MySQLConnection' => function ($sm) {
                     return new PDO('mysql:host=localhost;dbname=' . 'bablo', 'bablo3', 'parol');
                 },
+                        
+                
                 'navigation' => 'Zend\Navigation\Service\DefaultNavigationFactory',
                 
                 'ACL' => function ($sm) {

@@ -10,12 +10,10 @@ use Zend\View\Model\ViewModel;
 class AccountingController extends BaseAccountingController
 {
 
-    
-    
     public function incomeAction()
     {
         $view = new ViewModel();
-                
+        
         $view->message = '';
         $id = $this->getAuthService()->getIdentity();
         if (empty($id)) {

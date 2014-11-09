@@ -1,3 +1,9 @@
+<?php
+$this->headTitle("Edit Income");
+$this->headScript()->appendFile('/js/main.js');
+$this->headStyle()->appendStyle('.someClass{ border: solid; } ');
+//$this->inlineScript()->appendScript('$().ready(function(e){document.write("hello");});');
+?>
 <div class="row">
     
     
@@ -31,4 +37,3 @@ echo $this->form()->closeTag();
         });
     });
 </script>
-<script src="/js/main.js"></script>

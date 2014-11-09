@@ -57,5 +57,18 @@ class User {
         $this->email = $email;
     }
 
+    public function toArray() {
+        $arr = [];
+        foreach ($this as $field => $val) {
+            $arr[$field] = $val;
+        }
+        return $arr;
+    } 
+    
+    public function exchangeArray($data) {
+        foreach ($data as $field => $val) {
+            $this->$field = $val;
+        }
+    } 
 
 }
