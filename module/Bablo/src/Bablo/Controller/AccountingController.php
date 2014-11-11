@@ -58,7 +58,7 @@ class AccountingController extends BaseAccountingController
                 $income->setCurrency_id($this->params()->fromPost('currency_id'));
                 $income->setDate($this->params()->fromPost('date'));
                 $income->setSource($this->params()->fromPost('source_id'));
-                $income->setUserid($this->getRequest()->getSessionValue('id'));
+                $income->setUserid($this->getAuthService()->getIdentity());
                 $this->getIncomeService()->save($income);
             }
         }

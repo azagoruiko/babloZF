@@ -12,6 +12,7 @@ use bablo\model\User;
 use bablo\service\UserService;
 use Zend\Authentication\Adapter\AdapterInterface;
 use Zend\Authentication\Result;
+use Zend\Db\Sql\Expression;
 use Zend\Db\TableGateway\TableGateway;
 
 /**
@@ -64,7 +65,7 @@ class ZendMysqlUserService implements UserService, AdapterInterface {
     }
 
     public function authorize($name, $pass) {
-        $rowset = $this->gw->select(['email' => $name, 'password' => $pass]);
+        $rowset = $this->gw->select(['email' => $name, 'password' => new Expression('password(?)', $pass)]);
         return $rowset->current();
     }
 
@@ -74,13 +75,14 @@ class ZendMysqlUserService implements UserService, AdapterInterface {
     }
 
     public function resetPassword($email, $pass) {
-        return $this->gw->update(['password' => $pass], ['email' => $email]);
+        return $this->gw->update(['password' => new Expression('password(?)', $pass)], ['email' => $email]);
     }
 
     public function save(User $user) {
+        $pass = $user->getPass();
         return empty($user->getId())
-            ? $this->gw->insert(['name' => $user->getName(), 'password' => $user->getPass(), 'email' => $user->getEmail()])
-            : $this->gw->update(['name' => $user->getName(), 'password' => $user->getPass(), 'email' => $user->getEmail()], ['id' => $user->getId()]);
+            ? $this->gw->insert(['name' => $user->getName(), 'password' => new Expression('password(?)', $pass), 'email' => $user->getEmail()])
+            : $this->gw->update(['name' => $user->getName(), 'password' => new Expression('password(?)', $pass), 'email' => $user->getEmail()], ['id' => $user->getId()]);
     }
 
 }
