@@ -2,8 +2,10 @@
 
 namespace Bablo\Controller;
 
+use Bablo\Form\IncomeFilterForm;
 use Bablo\Form\IncomeForm;
 use bablo\model\Income;
+use bablo\model\IncomeSearchFilter;
 use bablo\zf2\BaseAccountingController;
 use Zend\View\Model\ViewModel;
 
@@ -13,18 +15,49 @@ class AccountingController extends BaseAccountingController
     public function incomeAction()
     {
         $view = new ViewModel();
+        $view->form = new IncomeFilterForm();
         
-        $view->message = '';
-        $id = $this->getAuthService()->getIdentity();
-        if (empty($id)) {
-            $view->message = 'you\'re not authorized, go away!';
-            $view->incomes = [];
-        } else {
-            list($month, $year)=$this->getSelectedYearMonth();
-            $view->incomes = $this->getIncomeService()->findAll($id, $month, $year);
-            $this->prepareMoneyReportForm($view);
+        $theFilter = new IncomeSearchFilter();
+        
+        list($year, $month)=$this->getTodayYearMonth();
+        $months = $this->getMonthArray($year, $month);
+        
+        $monthFrom = $view->form->get('month_from');
+        $monthFrom->setValueOptions($months);
+        
+        $monthTo = $view->form->get('month_to');
+        $monthTo->setValueOptions($months);
+        $theFilter->setMonthFrom(implode(',', [$month++, $year]));
+        $theFilter->setMonthTo(implode(',', [$month, $year]));
+        
+        $view->form->get('source')->setValueOptions(['1' => 'source 1', 2 => 'source 2', 3 => 'source 3']);
+        
+        $currencies = $this->getCurrencyService()->findAll();
+        $_curr = [];
+        foreach ($currencies as $c) {
+            $_curr[$c['id']] = $c['name'];
         }
 
+        $view->form->get('currency')->setValueOptions($_curr);
+        
+        $view->incomes=[];
+        
+        if ($this->getRequest()->isPost()) {
+            $view->form->bind($theFilter);
+            $view->form->setData($this->getRequest()->getPost()->toArray());
+            if ($view->form->isValid()) {
+                $fromDate = explode(',', $theFilter->getMonthFrom());
+                $toDate = explode(',', $theFilter->getMonthTo());
+                $month = $fromDate[0];
+                $year = $fromDate[1];
+
+                $view->incomes = $this->getIncomeService()->findAll($this->getAuthService()->getIdentity(), $month, $year);
+            } 
+        }
+        
+        $view->message = '';
+        
+        
         return $view;
     }
 

@@ -1,21 +1,39 @@
 <?php
-$this->headTitle("Income Report for " . $selectedMonth);
+$this->headTitle("Income Report");
+$this->headStyle(<<<EOD
+        .search_form {
+            background: #ffd25e;
+            border-radius: 5px;
+EOD
+        );
 ?>
-<form method="post" action="">
-    <select name="months">
+<?php echo $this->form()->openTag($form);?>
+<div class="row search_form">
+    <div class="col-md-4">
+<?php
+echo $this->babloFormRow($form->get('month_from'), 'form-group'); 
+echo $this->babloFormRow($form->get('month_to'), 'form-group'); 
+?>
+    </div>
+    <div class="col-md-4">
         <?php
-            $selected = '';
-            foreach ($months as $key=>$value){
-                if ($selectedMonth==$key){$selected=' selected';}
-                echo "<option$selected value=\"$key\">$value</option>";
-                $selected='';
-            }
-            
+        echo $this->babloFormRow($form->get('min_amount'), 'form-group');
+        echo $this->babloFormRow($form->get('currency'), 'form-group'); 
+        echo $this->formSubmit($form->get('submit'));
         ?>
-    </select>
-    <input type="submit"/>
-</form>
-<div>Selected month: <?php echo $months[$selectedMonth];?></div>
+    </div>
+    <div class="col-md-4">
+        <?php
+        echo $this->babloFormRow($form->get('max_amount'), 'form-group');
+        echo $this->babloFormRow($form->get('source'), 'form-group'); 
+        ?>
+    </div>
+</div>
+<?php
+
+echo $this->form()->closeTag();
+?>
+<div>Selected month: <?php echo 'not ready';?></div>
 <table id="incomes_table" class="table table-striped table-bordered table-condensed">
     <tr>
         <th>ID</th>

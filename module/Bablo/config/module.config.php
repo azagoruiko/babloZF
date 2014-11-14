@@ -11,6 +11,7 @@ return array(
     'view_helpers' => [
         'invokables' => [
             'summary' => '\Bablo\ViewHelper\SummaryHelper',
+            'babloFormRow' => '\Bablo\ViewHelper\BabloFormRow',
         ],
     ],
     'navigation' => [
