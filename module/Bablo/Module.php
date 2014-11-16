@@ -2,8 +2,8 @@
 namespace Bablo;
 
 use bablo\dao\MysqlCurrencyDAO;
+use bablo\model\Income;
 use bablo\model\User;
-use Bablo\Service\AuthUserService;
 use PDO;
 use Zend\Authentication\AuthenticationService;
 use Zend\Console\Request;
@@ -134,6 +134,13 @@ class Module
                     $resultPrototype = new ResultSet();
                     $resultPrototype->setArrayObjectPrototype(new User());
                     return new TableGateway('user', $adapter, null, $resultPrototype);
+                },
+                        
+                'Bablo\dao\IncomeTable' =>  function($sm) {
+                    $adapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultPrototype = new ResultSet();
+                    $resultPrototype->setArrayObjectPrototype(new Income());
+                    return new TableGateway('income', $adapter, null, $resultPrototype);
                 },
                 
                 'MySQLConnection' => function ($sm) {

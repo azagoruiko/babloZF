@@ -46,12 +46,7 @@ class AccountingController extends BaseAccountingController
             $view->form->bind($theFilter);
             $view->form->setData($this->getRequest()->getPost()->toArray());
             if ($view->form->isValid()) {
-                $fromDate = explode(',', $theFilter->getMonthFrom());
-                $toDate = explode(',', $theFilter->getMonthTo());
-                $month = $fromDate[0];
-                $year = $fromDate[1];
-
-                $view->incomes = $this->getIncomeService()->findAll($this->getAuthService()->getIdentity(), $month, $year);
+                $view->incomes = $this->getIncomeService()->findAll($this->getAuthService()->getIdentity(), $theFilter);
             } 
         }
         

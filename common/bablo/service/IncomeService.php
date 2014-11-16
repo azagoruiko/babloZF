@@ -9,16 +9,12 @@
 namespace bablo\service;
 
 use bablo\model\Income;
-
-/**
- *
- * @author andrii
- */
+use bablo\model\IncomeSearchFilter;
 interface IncomeService {
     function save(Income $income);
-    function findAll($userId, $month=null, $year=null);
+    function findAll($userId, IncomeSearchFilter $filter);
     function find($id);
-    public function getUpdates($userId=0, $lastId=0, $month=0, $year=0);
+    public function getUpdates($userId=0, $lastId=0, IncomeSearchFilter $filter);
     function delete($id);
     function getAnnualBalance ($userId=0, $year=null);
     function getRevenueBrokenByMonth ($userId=0, $month='', $year='');

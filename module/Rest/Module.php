@@ -66,9 +66,12 @@ class Module
                     return $dao;
                 },
                 'Rest\service\IncomeService' =>  function($sm) {
-                    $dao = $sm->get('Rest\dao\IncomeDAO');
-                    $srv = new IncomeServiceImpl($dao);
-                    return $srv;
+                    //$dao = $sm->get('Rest\dao\IncomeDAO');
+                    //$srv = new IncomeServiceImpl($dao);
+                    $gw = $sm->get('Bablo\dao\IncomeTable');
+                    $dao = new \Bablo\Service\ZendMysqlAccountingService();
+                    $dao->setGw($gw);
+                    return $dao;
                 },
                 'Rest\dao\IncomeDAO' =>  function($sm) {
                     $conn = $sm->get('MySQLConnection');

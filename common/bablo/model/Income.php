@@ -88,5 +88,11 @@ class Income implements \JsonSerializable {
         }
         return $obj;
     }
+    
+    public function exchangeArray($data) {
+        foreach ($data as $field => $val) {
+            $this->$field = $val;
+        }
+    } 
 
 }
