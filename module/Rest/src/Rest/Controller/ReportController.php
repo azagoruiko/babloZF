@@ -3,9 +3,9 @@
 namespace Rest\Controller;
 
 use bablo\dao\ExpenceDAO;
-use bablo\service\IncomeService;
+use Bablo\Form\IncomeFilterForm;
+use bablo\model\IncomeSearchFilter;
 use bablo\zf2\BaseAccountingController;
-use Zend\Session\Container;
 use Zend\View\Model\JsonModel;
 
 class ReportController extends BaseAccountingController
@@ -59,19 +59,52 @@ class ReportController extends BaseAccountingController
     
     function incomeUpdatesAction() {
         $view = new JsonModel();
-        $dates = $this->getSelectedYearMonth();
-        $view->updates = $this->getIncomeService()->getUpdates(
+        $form = new IncomeFilterForm();
+        $theFilter = new IncomeSearchFilter();
+        
+        list($year, $month)=$this->getTodayYearMonth();
+        $months = $this->getMonthArray($year, $month);
+        
+        $monthFrom = $form->get('month_from');
+        $monthFrom->setValueOptions($months);
+        
+        $monthTo = $form->get('month_to');
+        $monthTo->setValueOptions($months);
+        
+        $form->get('source')->setValueOptions(['1' => 'source 1', 2 => 'source 2', 3 => 'source 3']);
+        
+        $currencies = $this->getCurrencyService()->findAll();
+        $_curr = [];
+        foreach ($currencies as $c) {
+            $_curr[$c['id']] = $c['name'];
+        }
+
+        $form->get('currency')->setValueOptions($_curr);
+        
+        $view->updates = [];
+        if ($this->getRequest()->isPost()) {
+            $form->bind($theFilter);
+            $form->setData($this->getRequest()->getPost()->toArray());
+            if ($form->isValid()) {
+                $view->updates = $this->getIncomeService()->getUpdates(
                 $this->getAuthService()->getIdentity(), 
                 $this->params()->fromPost('since'),
-                $dates[0], $dates[1]);
-        $maxId = $this->params()->fromPost('since');
-        foreach ($view->updates as $update) {
-            if ($maxId < $update->getId()) {
-                $maxId = $update->getId();
-            }
+                $theFilter);
+                $maxId = $this->params()->fromPost('since');
+                foreach ($view->updates as $update) {
+                    if ($maxId < $update->getId()) {
+                        $maxId = $update->getId();
+                    }
+                }
+                $view->maxId = $maxId;
+            } 
         }
-        $view->maxId = $maxId;
         return $view;
+    }
+    
+    function deleteAction() {
+        $res = $this->getIncomeService()->delete($this->params()->fromPost('id'));
+        return new JsonModel(['result' => $res]);
     }
 }
 

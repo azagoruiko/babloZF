@@ -2,7 +2,7 @@
 
 namespace bablo\model;
 
-class IncomeSearchFilter {
+class IncomeSearchFilter implements \JsonSerializable {
     private $monthFrom;
     private $monthTo;
     private $minAmount;
@@ -62,5 +62,18 @@ class IncomeSearchFilter {
         foreach ($data as $field => $val) {
             $this->$field = $val;
         }
-    } 
+    }
+    
+    public function toArray() {
+        $array = [];
+        foreach ($this as $key => $value) {
+            $array[$key] = $value;
+        }
+        return $array;
+    }
+
+    public function jsonSerialize() {
+        return json_encode($this->toArray());
+    }
+
 }

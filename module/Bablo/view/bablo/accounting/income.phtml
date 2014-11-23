@@ -1,4 +1,5 @@
 <?php
+$this->headScript()->appendScript('var filterData = ' . $theFilter . ';');
 $this->headTitle("Income Report");
 $this->headStyle(<<<EOD
         .search_form {
@@ -50,16 +51,7 @@ echo $this->form()->closeTag();
     foreach ($incomes as $income) {
         $usdAmount+=$income->getUsdAmount();
         $curentUsdAmount=round($income->getUsdAmount(),2);
-        echo "<tr><td>{$income->getId()}</td>"
-        . "<td>{$income->getDate()}</td>"
-        . "<td>{$income->getAmount()}</td>"
-        . "<td>{$income->getCurrency()}</td>"
-        . "<td>\${$curentUsdAmount}</td>"
-        . "<td>"
-        . "<a href=\"{$this->url('bablo/default', ['controller' => 'accounting', 'action' => 'edit-income', 'id' => $income->getId()])}\" class=\"btn btn-info\">Edit</a>"
-        . "<button class=\"btn btn-danger\">Delete</button>"
-        . "</td>" 
-        . "</tr>";
+        echo $this->partial('partial/income-row.phtml', ['income' => $income, 'curentUsdAmount' => $curentUsdAmount]);
     }
     
 ?>

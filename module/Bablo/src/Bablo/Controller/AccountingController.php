@@ -51,6 +51,7 @@ class AccountingController extends BaseAccountingController
         }
         
         $view->message = '';
+        $view->theFilter = $theFilter->jsonSerialize();
         
         
         return $view;
@@ -80,12 +81,9 @@ class AccountingController extends BaseAccountingController
         $view->form->get('source_id')->setValueOptions(['1' => 'source 1', 2 => 'source 2', 3 => 'source 3']);
         
         if ($this->getRequest()->isPost()) {
+            $view->form->bind($income);
             $view->form->setData($this->getRequest()->getPost());
             if ($view->form->isValid()) {
-                $income->setAmount($this->params()->fromPost('amount'));
-                $income->setCurrency_id($this->params()->fromPost('currency_id'));
-                $income->setDate($this->params()->fromPost('date'));
-                $income->setSource($this->params()->fromPost('source_id'));
                 $income->setUserid($this->getAuthService()->getIdentity());
                 $this->getIncomeService()->save($income);
             }

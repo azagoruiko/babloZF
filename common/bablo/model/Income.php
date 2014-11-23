@@ -24,11 +24,11 @@ class Income implements \JsonSerializable {
         $this->usdAmount = $usdAmount;
     }
 
-        public function getCurrency_id() {
+        public function getCurrencyId() {
         return $this->currency_id;
     }
 
-    public function setCurrency_id($currency_id) {
+    public function setCurrencyId($currency_id) {
         $this->currency_id = $currency_id;
     }
 
@@ -94,5 +94,16 @@ class Income implements \JsonSerializable {
             $this->$field = $val;
         }
     } 
+    
+    public function toArray($withId = true, $withCustomFields = true) {
+        $customFields = ['currency', 'source', 'usdAmount'];
+        $array = [];
+        foreach ($this as $key => $value) {
+            if (($key !== 'id' || $withId) && (!in_array($key, $customFields) || $withCustomFields)) {
+                $array[$key] = $value;
+            }
+        }
+        return $array;
+    }
 
 }

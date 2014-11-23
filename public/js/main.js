@@ -37,9 +37,9 @@ function getIncomeUpdates() {
 
 function getIncomeUpdatesJSON() {
     if (ajaxInProgress) return;
-    $.post('/report/incomeUpdates', {
-            since: sinceWhen,
-            months: $('[name=months]').val()},
+
+    filterData.since = sinceWhen;
+    $.post('/report/incomeUpdates', filterData,
         function (data) {
             for (i = 0; i < data.updates.length; i++) {
                 var newRow = $('<tr id="row_' + data.updates[i].id + '"></tr>');
@@ -82,7 +82,7 @@ $().ready(function() {
         var row = $(this).parent().parent();
         var id = $(row).children().first().text();
         if (confirm('Точно удалть ' + id + '?')) {
-            $.post('index.php?ctrl=income&action=delete', {id: id},
+            $.post('/report/delete', {id: id},
             function (data) {
                 if (data.result != -1) {
                     $(row).remove();

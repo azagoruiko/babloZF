@@ -20,6 +20,10 @@ class IncomeForm extends Form {
     private function setupFields() {
         $this->setHydrator(new ClassMethods());
         $this->add(array(
+             'name' => 'id',
+             'type' => 'hidden',
+         ));
+        $this->add(array(
              'name' => 'amount',
              'type' => 'Number',
              'options' => array(
