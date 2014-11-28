@@ -76,4 +76,15 @@ class IncomeSearchFilter implements \JsonSerializable {
         return json_encode($this->toArray());
     }
 
+    private function arrayToStringKey($array) {
+        $key = '';
+        foreach ($array as $el) {
+            $key .= '-' . (is_array($el) ? $this->arrayToStringKey($el) : $el);
+        }
+        return $key;
+    }
+    
+    public function __toString() {
+        return str_replace(',', '-', $this->arrayToStringKey($this->toArray()));
+    }
 }

@@ -3,7 +3,7 @@ namespace Rest;
 
 use bablo\dao\MysqlExpenceDAO;
 use bablo\dao\MysqlIncomeDAO;
-use bablo\service\IncomeServiceImpl;
+use Bablo\Service\ZendMysqlAccountingService;
 use PDO;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
@@ -57,27 +57,7 @@ class Module
     public function getServiceConfig() {
         return array(
             'factories' => array(
-                'Rest\service\ExpenceService' =>  function($sm) {
-                    return $sm->get('Rest\dao\ExpenceDAO');
-                },
-                'Rest\dao\ExpenceDAO' =>  function($sm) {
-                    $conn = $sm->get('MySQLConnection');
-                    $dao = new MysqlExpenceDAO($conn);
-                    return $dao;
-                },
-                'Rest\service\IncomeService' =>  function($sm) {
-                    //$dao = $sm->get('Rest\dao\IncomeDAO');
-                    //$srv = new IncomeServiceImpl($dao);
-                    $gw = $sm->get('Bablo\dao\IncomeTable');
-                    $dao = new \Bablo\Service\ZendMysqlAccountingService();
-                    $dao->setGw($gw);
-                    return $dao;
-                },
-                'Rest\dao\IncomeDAO' =>  function($sm) {
-                    $conn = $sm->get('MySQLConnection');
-                    $dao = new MysqlIncomeDAO($conn);
-                    return $dao;
-                },
+                
                 'MySQLConnection' => function ($sm) {
                     return new PDO('mysql:host=localhost;dbname=' . 'bablo', 'bablo3', 'parol');
                 },

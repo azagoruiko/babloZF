@@ -10,13 +10,28 @@ use Zend\Db\Sql\Predicate\Expression as PredExpression;
 use Zend\Db\Sql\Predicate\Predicate;
 use Zend\Db\Sql\Predicate\PredicateSet;
 use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Where;
 use Zend\Db\TableGateway\TableGateway;
+use Zend\Db\TableGateway\TableGatewayInterface;
 
 class ZendMysqlAccountingService implements IncomeService {
     
     private $gw;
+    private $cache;
     
+    
+    /**
+     * 
+     * @return AccountingCache
+     */
+    public function getCache() {
+        return $this->cache;
+    }
+
+    public function setCache(AccountingCache $cache) {
+        $this->cache = $cache;
+    }
+
+        
     
     /**
      * 
@@ -24,9 +39,9 @@ class ZendMysqlAccountingService implements IncomeService {
      */
     public function getGw() {
         return $this->gw;
-    }
+    } 
 
-    public function setGw($gw) {
+    public function setGw(TableGatewayInterface $gw) {
         $this->gw = $gw;
     }
 
@@ -114,13 +129,22 @@ class ZendMysqlAccountingService implements IncomeService {
     }
     
     public function findAll($userId, IncomeSearchFilter $filter) {
-        return $this->getGw()->select( function (Select $select) use ($filter) {
-            $this->prepareIncomeSelect($select);
-            $this->addIncomeFiltersToSelect($select, $filter);
-            
-            // test your sql code!
-            //$sql = $select->getSqlString();
-        });
+        $key = $userId . '-' . $filter;
+        if (($_data = $this->getCache()->get($key)) === null) {
+            $data = $this->getGw()->select( function (Select $select) use ($filter) {
+                $this->prepareIncomeSelect($select);
+                $this->addIncomeFiltersToSelect($select, $filter);
+
+                // test your sql code!
+                //$sql = $select->getSqlString();
+            });
+
+            foreach ($data as $item) {
+                $_data[] = $item;
+            }
+            $this->getCache()->put($key, $_data);
+        }
+        return $_data;
     }
 
     public function getUpdates($userId = 0, $lastId = 0, IncomeSearchFilter $filter) {
@@ -134,6 +158,7 @@ class ZendMysqlAccountingService implements IncomeService {
     }
 
     public function save(Income $income) {
+        $this->getCache()->invalidate($income->getUserid());
         if (!empty($income->getId())) {
             return $this->getGw()->update($income->toArray(false, false), ['id' => $income->getId()]);
         } else {

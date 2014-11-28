@@ -2,10 +2,16 @@
 namespace Bablo;
 
 use bablo\dao\MysqlCurrencyDAO;
+use bablo\dao\MysqlIncomeDAO;
 use bablo\model\Income;
 use bablo\model\User;
+use Bablo\Service\AccountingCacheImpl;
+use Bablo\Service\AuthStorage;
+use Bablo\Service\ZendMysqlAccountingService;
+use Bablo\Service\ZendMysqlUserService;
 use PDO;
 use Zend\Authentication\AuthenticationService;
+use Zend\Cache\StorageFactory;
 use Zend\Console\Request;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
@@ -100,7 +106,7 @@ class Module
                     return $sm->get('Bablo\dao\CurrencyDAO');
                 },
                 'Bablo\service\AuthSession' => function($sm) {
-                    $srv = new Service\AuthStorage();
+                    $srv = new AuthStorage();
                     return $srv;
                 },
                 'Bablo\dao\CurrencyDAO' =>  function($sm) {
@@ -124,7 +130,7 @@ class Module
                     //$conn = $sm->get('MySQLConnection');
                     //$dao = new MysqlUserDAO($conn);
                     $gw = $sm->get('Bablo\dao\UserTable');
-                    $dao = new Service\ZendMysqlUserService();
+                    $dao = new ZendMysqlUserService();
                     $dao->setGw($gw);
                     return $dao;
                 },
@@ -135,6 +141,9 @@ class Module
                     $resultPrototype->setArrayObjectPrototype(new User());
                     return new TableGateway('user', $adapter, null, $resultPrototype);
                 },
+                
+                
+                
                         
                 'Bablo\dao\IncomeTable' =>  function($sm) {
                     $adapter = $sm->get('Zend\Db\Adapter\Adapter');
@@ -146,8 +155,28 @@ class Module
                 'MySQLConnection' => function ($sm) {
                     return new PDO('mysql:host=localhost;dbname=' . 'bablo', 'bablo3', 'parol');
                 },
-                        
                 
+                'Bablo\Cache\Accounting' => function ($sm) {
+                    $cache = new AccountingCacheImpl();
+                    $cache->setCacheAdapter($sm->get('Bablo\Cache\Adapter'));
+                    return $cache;
+                },     
+                
+                'Bablo\Cache\Adapter' => function($sm) {
+                    $cache = StorageFactory::factory([
+                        'plugins' => [
+                            'exception_handler' => ['throw_exceptions' => true],
+                            'serializer'
+                        ],
+                        'adapter' => 'filesystem',
+                        //'adapter' => 'memcached',
+                    ]);
+                    $cache->setOptions([
+                        'cache_dir' => './data/cache'
+                    ]);
+                    return $cache;
+                },
+                        
                 'navigation' => 'Zend\Navigation\Service\DefaultNavigationFactory',
                 
                 'ACL' => function ($sm) {
@@ -173,6 +202,30 @@ class Module
                     $acl->allow('user', 'mvc:Rest\Controller\Validate');
                     
                     return $acl;
+                },
+                        
+                'Rest\service\ExpenceService' =>  function($sm) {
+                    return $sm->get('Rest\dao\ExpenceDAO');
+                },
+                'Rest\dao\ExpenceDAO' =>  function($sm) {
+                    $conn = $sm->get('MySQLConnection');
+                    $dao = new MysqlExpenceDAO($conn);
+                    return $dao;
+                },
+                'Rest\dao\IncomeDAO' =>  function($sm) {
+                    $conn = $sm->get('MySQLConnection');
+                    $dao = new MysqlIncomeDAO($conn);
+                    return $dao;
+                },
+                'Rest\service\IncomeService' =>  function($sm) {
+                    //$dao = $sm->get('Rest\dao\IncomeDAO');
+                    //$srv = new IncomeServiceImpl($dao);
+                    $gw = $sm->get('Bablo\dao\IncomeTable');
+                    $dao = new ZendMysqlAccountingService();
+                    $dao->setGw($gw);
+                    
+                    $dao->setCache($sm->get('Bablo\Cache\Accounting'));
+                    return $dao;
                 },
         ));
     }
