@@ -126,6 +126,15 @@ class Module
                     $srv = $dao;
                     return $srv;
                 },
+                
+                'Bablo\service\RateService' =>  function($sm) {
+                    $gw = $sm->get('Bablo\dao\RateTable');
+                    $srv = new Service\CurrencyServiceImpl();
+                    $srv->setGw($gw);
+                    $srv->setCache($sm->get('Bablo\Cache\Accounting'));
+                    return $srv;
+                },
+                        
                 'Bablo\dao\UserDAO' =>  function($sm) {
                     //$conn = $sm->get('MySQLConnection');
                     //$dao = new MysqlUserDAO($conn);
@@ -142,7 +151,12 @@ class Module
                     return new TableGateway('user', $adapter, null, $resultPrototype);
                 },
                 
-                
+                'Bablo\dao\RateTable' =>  function($sm) {
+                    $adapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultPrototype = new ResultSet();
+                    //$resultPrototype->setArrayObjectPrototype(new User());
+                    return new TableGateway('rate', $adapter, null);
+                },
                 
                         
                 'Bablo\dao\IncomeTable' =>  function($sm) {

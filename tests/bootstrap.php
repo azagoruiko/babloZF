@@ -6,7 +6,7 @@ function loadCommon($class) {
 
 function loadProject($class) {
     $path = '../module/Bablo/src/' . str_replace('\\', '/', $class . '.php');
-    echo $path;
+    //echo $path;
     if (file_exists($path))        require_once $path;
 }
 

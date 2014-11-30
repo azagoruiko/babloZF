@@ -21,7 +21,14 @@ class ReportController extends BaseAccountingController
         return $sm->get('Rest\service\ExpenceService');
     }
     
-    
+    /**
+     * 
+     * @return \Bablo\Service\CurrencyService
+     */
+    protected function getRateService() {
+        $sm = $this->getServiceLocator();
+        return $sm->get('Bablo\service\RateService');
+    }
 
     function monthlyIncomeAction() {
         $view = new JsonModel();
@@ -105,6 +112,11 @@ class ReportController extends BaseAccountingController
     function deleteAction() {
         $res = $this->getIncomeService()->delete($this->params()->fromPost('id'));
         return new JsonModel(['result' => $res]);
+    }
+    
+    function rateAction() {
+        $rate = $this->getRateService()->getRate($this->params()->fromQuery('currency'), $this->params()->fromQuery('date'));
+        return new JsonModel($rate);
     }
 }
 

@@ -4,7 +4,13 @@ namespace Bablo\Mock;
 
 use Zend\Db\TableGateway\TableGatewayInterface;
 class TableGatewayMock implements TableGatewayInterface {
+    
     private $selectCalled = false;
+    private $select = null;
+    
+    public function reset() {
+        $this->selectCalled = false;
+    }
     
     public function getSelectCalled() {
         return $this->selectCalled;
@@ -23,6 +29,11 @@ class TableGatewayMock implements TableGatewayInterface {
     }
 
     public function select($where = null) {
+        echo "selecting...\n";
+        if (is_callable($where)) {
+            $this->select = new SelectMock();
+            $where($this->select);
+        }
         $this->selectCalled = true;
         return ['data' => 'data'];
     }
@@ -30,5 +41,14 @@ class TableGatewayMock implements TableGatewayInterface {
     public function update($set, $where = null) {
         
     }
+    
+    /**
+     * 
+     * @return \Zend\Db\Sql\Select
+     */
+    public function getSelect() {
+        return $this->select;
+    }
+
 
 }
