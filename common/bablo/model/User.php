@@ -1,30 +1,32 @@
 <?php
 namespace bablo\model;
-
+use Doctrine\ORM\Mapping as ORM;
+//use Doctrine\ORM\Mapping\Ta
 /**
  * Description of User
- * @Annotation\Hydrator("Zend\Stdlib\Hydrator\ObjectProperty")
- * @Annotation\Name("User")
+ * @ORM\Entity 
+ * @ORM\Table(name="bablo.user")
  * @author andrii
  */
 class User {
-    private $id;
+    /**
+    * @ORM\Id
+    * @ORM\GeneratedValue(strategy="AUTO")
+    * @ORM\Column(type="integer")
+    */
+    protected $id;
     
     /**
-     * @Annotation\Type("Zend\Form\Element\Text") 
-     * @Annotation\Required({"required":"true"})
-     * @Annotation\Filter({"name":"StripTags"})
-     * @Annotation\Options({"label":"Name"})
+     * @ORM\Column(type="string") 
      */
-    private $name;
+    protected $name;
+    
     /**
-     * @Annotation\Type("Zend\Form\Element\Password") 
-     * @Annotation\Required({"required":"true"})
-     * @Annotation\Filter({"name":"StripTags"})
-     * @Annotation\Options({"label":"Password"})
+     * @ORM\Column(type="string") 
      */
-    private $password;
-    private $email;
+    protected $password;
+    /** @ORM\Column(type="string") */
+    protected $email;
     
     function getName() {
         return $this->name;

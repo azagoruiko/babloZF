@@ -8,7 +8,10 @@
 return array(
     'modules' => array(
         'Bablo',
-        'Rest'
+        'Rest',
+        //'ZendDeveloperTools',
+        'DoctrineModule',
+        'DoctrineORMModule',
     ),
     'module_listener_options' => array(
         'module_paths' => array(

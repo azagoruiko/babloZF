@@ -1,30 +1,47 @@
 <?php
 namespace bablo\model;
-
-/**
- * Description of Income
- *
- * @author andrii
+use Doctrine\ORM\Mapping as ORM;
+/** 
+ * @ORM\Entity
+ * @ORM\Table(name="bablo.income")
  */
 class Income implements \JsonSerializable {
-    private $id;
-    private $amount;
-    private $currency;
-    private $user_id;
-    private $source;
-    private $date;
-    private $currency_id;
-    private $usdAmount;
-    
-    public function getUsdAmount() {
-        return $this->usdAmount;
-    }
+    /**
+    * @ORM\Id
+    * @ORM\GeneratedValue(strategy="AUTO")
+    * @ORM\Column(type="integer")
+    */
+    protected $id;
+    /**
+     * @ORM\Column(type="float") 
+     */
+    protected $amount;
+    /**
+     * @ORM\ManyToOne(targetEntity="\bablo\model\Currency")
+     * @ORM\JoinColumn(name="currency_id", referencedColumnName="id")
+     **/
+    protected $currency;
+    /**
+     * @ORM\Column(type="integer") 
+     */
+    protected $user_id;
+    /**
+     * @ORM\ManyToOne(targetEntity="\bablo\model\User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     **/
+    protected $user;
+    //protected $source;
+    /**
+     * @ORM\Column(type="datetime") 
+     */
+    protected $date;
+    /**
+     * @ORM\Column(type="integer") 
+     */
+    protected $currency_id;
 
-    public function setUsdAmount($usdAmount) {
-        $this->usdAmount = $usdAmount;
-    }
 
-        public function getCurrencyId() {
+    public function getCurrencyId() {
         return $this->currency_id;
     }
 
@@ -46,7 +63,7 @@ class Income implements \JsonSerializable {
     }
 
     public function getCurrency() {
-        return $this->currency;
+        return $this->currency->getName();
     }
 
     public function getUserid() {
@@ -58,7 +75,7 @@ class Income implements \JsonSerializable {
     }
 
     public function getDate() {
-        return $this->date;
+        return $this->date->format('Y-m-d');
     }
 
     public function setAmount($amount) {
@@ -79,6 +96,12 @@ class Income implements \JsonSerializable {
 
     public function setDate($date) {
         $this->date = $date;
+    }
+    
+    public function getUsdAmount() {
+        $rates = $this->currency->getRates();
+        $rate = $rates[0];
+        return $rate->getRate() * $this->amount;
     }
 
     public function jsonSerialize() {

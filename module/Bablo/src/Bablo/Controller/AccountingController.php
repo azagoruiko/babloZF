@@ -43,10 +43,12 @@ class AccountingController extends BaseAccountingController
         $view->incomes=[];
         
         if ($this->getRequest()->isPost()) {
+            $page = $this->params()->fromPost('page');
             $view->form->bind($theFilter);
             $view->form->setData($this->getRequest()->getPost()->toArray());
             if ($view->form->isValid()) {
-                $view->incomes = $this->getIncomeService()->findAll($this->getAuthService()->getIdentity(), $theFilter);
+                $view->form->setData($this->getRequest()->getPost()->toArray());
+                $view->incomes = $this->getIncomeService()->findAll($this->getAuthService()->getIdentity(), $theFilter, $page);
             } 
         }
         

@@ -8,6 +8,19 @@
  */
 
 return array(
+    'doctrine' => array(
+        'driver' => array(
+          'application_entities' => array(
+            'class' =>'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
+            'cache' => 'array',
+            'paths' => array(__DIR__ . '/../../../common/bablo/model')
+          ),
+
+          'orm_default' => array(
+            'drivers' => array(
+              'bablo\model' => 'application_entities'
+            )
+      ))),
     'view_helpers' => [
         'invokables' => [
             'summary' => '\Bablo\ViewHelper\SummaryHelper',
@@ -30,10 +43,11 @@ return array(
             ],
             [
                 'label' => 'Бабло',
-                'route' => 'bablo/default',
+                'route' => 'income',
                 'controller' => 'accounting',
                 'action' => 'income',
                 'resource' => 'mvc:Bablo\Controller\Accounting',
+                'page' => 0,
             ],
             [
                 'label' => 'Выход',
@@ -63,6 +77,17 @@ return array(
                     'defaults' => array(
                         'controller' => 'Bablo\Controller\Index',
                         'action'     => 'dashboard',
+                    ),
+                ),
+            ),
+            'income' => array(
+                'type' => 'Segment',
+                'options' => array(
+                    'route'    => '/income',
+                    'defaults' => array(
+                        'page' => 0,
+                        'controller' => 'Bablo\Controller\Accounting',
+                        'action'     => 'income',
                     ),
                 ),
             ),

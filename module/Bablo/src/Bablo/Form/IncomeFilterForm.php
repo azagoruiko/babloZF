@@ -8,6 +8,12 @@ use Zend\Stdlib\Hydrator\ClassMethods;
 class IncomeFilterForm extends Form {
     private function setupFields() {
         $this->setHydrator(new ClassMethods());
+        
+        $this->add([
+            'name' => 'page',
+            'type' => 'Zend\Form\Element\Hidden',
+        ]);
+        
         $this->add([
             'name' => 'month_from',
             'type' => 'Zend\Form\Element\Select',

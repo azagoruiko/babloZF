@@ -1,0 +1,13 @@
+<?php if (!empty($pages) && $pages->count()): ?>
+<nav>
+  <ul class="pagination">
+    <li><a href="#"><span aria-hidden="true">&laquo;</span><span class="sr-only">Previous</span></a></li>
+    <?php
+    foreach ($pages->getPagesInRange(1, 10) as $page) {
+        echo "<li><a href=\"#\">$page</a></li>";
+    }
+    ?>
+    <li><a href="#"><span aria-hidden="true">&raquo;</span><span class="sr-only">Next</span></a></li>
+  </ul>
+</nav>
+<?php endif;

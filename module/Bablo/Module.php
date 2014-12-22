@@ -128,9 +128,12 @@ class Module
                 },
                 
                 'Bablo\service\RateService' =>  function($sm) {
-                    $gw = $sm->get('Bablo\dao\RateTable');
-                    $srv = new Service\CurrencyServiceImpl();
-                    $srv->setGw($gw);
+                    //$gw = $sm->get('Bablo\dao\RateTable');
+                    //$srv = new Service\CurrencyServiceImpl();
+                    //$srv->setGw($gw);
+                    $srv = new Service\DoctrineCurrencyService();
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $srv->setSm($em);
                     $srv->setCache($sm->get('Bablo\Cache\Accounting'));
                     return $srv;
                 },
@@ -138,9 +141,11 @@ class Module
                 'Bablo\dao\UserDAO' =>  function($sm) {
                     //$conn = $sm->get('MySQLConnection');
                     //$dao = new MysqlUserDAO($conn);
-                    $gw = $sm->get('Bablo\dao\UserTable');
-                    $dao = new ZendMysqlUserService();
-                    $dao->setGw($gw);
+                    //$gw = $sm->get('Bablo\dao\UserTable');
+                    //$dao = new ZendMysqlUserService();
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $dao = new Service\DoctrineUserService();
+                    $dao->setEm($em);
                     return $dao;
                 },
                 
@@ -234,12 +239,16 @@ class Module
                 'Rest\service\IncomeService' =>  function($sm) {
                     //$dao = $sm->get('Rest\dao\IncomeDAO');
                     //$srv = new IncomeServiceImpl($dao);
-                    $gw = $sm->get('Bablo\dao\IncomeTable');
-                    $dao = new ZendMysqlAccountingService();
-                    $dao->setGw($gw);
+                    //$gw = $sm->get('Bablo\dao\IncomeTable');
+                    //$dao = new ZendMysqlAccountingService();
+                    //$dao->setGw($gw);
                     
-                    $dao->setCache($sm->get('Bablo\Cache\Accounting'));
-                    return $dao;
+                    //$dao->setCache($sm->get('Bablo\Cache\Accounting'));
+                    
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $srv = new Service\DoctrineIncomeService();
+                    $srv->setEm($em);
+                    return $srv;
                 },
         ));
     }

@@ -31,7 +31,7 @@ class IndexController extends AbstractActionController
      * 
      * @return AuthenticationService Description
      */
-    private function getAuthService() {
+    public function getAuthService() {
         $sm = $this->getServiceLocator();
         return $sm->get('AuthService');
     }

@@ -32,6 +32,7 @@ echo $this->form()->closeTag();
                 source_id: [$('#income [name=source_id\\[\\]] option:selected').val()],
             },
             function (data) {
+                // process data
                 e.preventDefault();
             });
         });

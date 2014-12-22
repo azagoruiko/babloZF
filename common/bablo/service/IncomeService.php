@@ -12,7 +12,7 @@ use bablo\model\Income;
 use bablo\model\IncomeSearchFilter;
 interface IncomeService {
     function save(Income $income);
-    function findAll($userId, IncomeSearchFilter $filter);
+    function findAll($userId, IncomeSearchFilter $filter, $page=1, $count=10);
     function find($id);
     public function getUpdates($userId=0, $lastId=0, IncomeSearchFilter $filter);
     function delete($id);
