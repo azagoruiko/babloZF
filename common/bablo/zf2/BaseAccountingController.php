@@ -35,6 +35,15 @@ class BaseAccountingController extends AbstractActionController {
     
     /**
      * 
+     * @return \Bablo\Service\DoctrineUserService
+     */
+    protected function getUserService() {
+        $sm = $this->getServiceLocator();
+        return $sm->get('Bablo\dao\UserDAO');
+    }
+    
+    /**
+     * 
      * @return \bablo\dao\CurrencyDAO Description
      */
     protected function getCurrencyService() {

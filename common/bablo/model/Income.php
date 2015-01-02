@@ -2,8 +2,8 @@
 namespace bablo\model;
 use Doctrine\ORM\Mapping as ORM;
 /** 
- * @ORM\Entity
  * @ORM\Table(name="bablo.income")
+ * @ORM\Entity
  */
 class Income implements \JsonSerializable {
     /**
@@ -40,7 +40,24 @@ class Income implements \JsonSerializable {
      */
     protected $currency_id;
 
+    protected $source;
+    public function getUser() {
+        return $this->user;
+    }
 
+    public function setUser($user) {
+        $this->user = $user;
+    }
+
+        public function getCurrency_id() {
+        return $this->currency_id;
+    }
+
+    public function setCurrency_id($currency_id) {
+        $this->currency_id = $currency_id;
+    }
+
+        
     public function getCurrencyId() {
         return $this->currency_id;
     }
@@ -63,7 +80,7 @@ class Income implements \JsonSerializable {
     }
 
     public function getCurrency() {
-        return $this->currency->getName();
+        return $this->currency;
     }
 
     public function getUserid() {
@@ -75,7 +92,9 @@ class Income implements \JsonSerializable {
     }
 
     public function getDate() {
-        return $this->date->format('Y-m-d');
+        if (!empty($this->date)) {
+            return $this->date;//->format('Y-m-d');
+        } else return null;
     }
 
     public function setAmount($amount) {
@@ -99,6 +118,9 @@ class Income implements \JsonSerializable {
     }
     
     public function getUsdAmount() {
+        if (empty($this->currency)) {
+            return null;
+        }
         $rates = $this->currency->getRates();
         $rate = $rates[0];
         return $rate->getRate() * $this->amount;

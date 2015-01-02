@@ -17,6 +17,20 @@ use Zend\Stdlib\Hydrator\ClassMethods;
  * @author andrii
  */
 class IncomeForm extends Form {
+    protected $em;
+    
+    /**
+     * 
+     * @return \Doctrine\ORM\EntityManager
+     */
+    public function getEm() {
+        return $this->em;
+    }
+
+    public function setEm($em) {
+        $this->em = $em;
+    }
+    
     private function setupFields() {
         $this->setHydrator(new ClassMethods());
         $this->add(array(
@@ -30,12 +44,27 @@ class IncomeForm extends Form {
                  'label' => 'Amount',
              ),
          ));
-        $this->add([
+        /*$this->add([
             'type' => 'Zend\Form\Element\Select',
             'name' => 'currency_id',
             'attributes' => ['type' => 'select', 'id' => 'currency_id'],
             'options' => ['label' => 'Currency: '],
-        ]);
+        ]);*/
+        
+        $this->add(array(
+           'name' => 'currency',
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'options' => array(
+                'object_manager'     => $this->em,
+                'target_class'       => 'bablo\model\Currency',
+                'property' => 'name',
+                'is_method' => true,
+                'find_method'        => array(
+                    'name'   => 'findAll',
+                ),
+            ), 
+        ));
+        
         $this->add(array(
              'name' => 'date',
              'type' => 'date',
@@ -79,6 +108,9 @@ class IncomeForm extends Form {
     }
     
     function __construct($name = null) {
+        if ($name instanceof \Doctrine\ORM\EntityManager) {
+            $this->em = $name;
+        }
         parent::__construct('income');
         $this->setupFields();
         $this->setUpFilters();

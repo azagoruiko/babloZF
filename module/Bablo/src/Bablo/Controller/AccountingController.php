@@ -34,7 +34,8 @@ class AccountingController extends BaseAccountingController
         
         $currencies = $this->getCurrencyService()->findAll();
         $_curr = [];
-        foreach ($currencies as $c) {
+        foreach ($currencies as $c_) {
+            $c = $c_->toArray();
             $_curr[$c['id']] = $c['name'];
         }
 
@@ -64,12 +65,7 @@ class AccountingController extends BaseAccountingController
         $view = new ViewModel();
         $income = new Income();
         
-        $view->form = new IncomeForm();
-        $currencies = $this->getCurrencyService()->findAll();
-        $_curr = [];
-        foreach ($currencies as $c) {
-            $_curr[$c['id']] = $c['name'];
-        }
+        $view->form = new IncomeForm($this->getIncomeService()->getEm());
         
         $id = $this->params()->fromRoute('id');
         
@@ -78,8 +74,6 @@ class AccountingController extends BaseAccountingController
             $income->setDate(substr($income->getDate(), 0, 10));
             $view->form->bind($income);
         }
-        
-        $view->form->get('currency_id')->setValueOptions($_curr);
         $view->form->get('source_id')->setValueOptions(['1' => 'source 1', 2 => 'source 2', 3 => 'source 3']);
         
         if ($this->getRequest()->isPost()) {
@@ -87,6 +81,11 @@ class AccountingController extends BaseAccountingController
             $view->form->setData($this->getRequest()->getPost());
             if ($view->form->isValid()) {
                 $income->setUserid($this->getAuthService()->getIdentity());
+                $user = $this->getUserService()->find($income->getUserId());
+                $income->setUser($user);
+                $currency = $this->getCurrencyService()->find($income->getCurrency());
+                $income->setCurrency($currency);
+                $income->setDate(new \DateTime($income->getDate()));
                 $this->getIncomeService()->save($income);
             }
         }

@@ -6,6 +6,7 @@ use Zend\Form\Form;
 use Zend\Stdlib\Hydrator\ClassMethods;
 
 class IncomeFilterForm extends Form {
+        
     private function setupFields() {
         $this->setHydrator(new ClassMethods());
         
@@ -64,6 +65,8 @@ class IncomeFilterForm extends Form {
             'attributes' => ['type' => 'select', 'id' => 'currency_id', 'multiple' => 'multiple','class' => 'form-control',],
             'options' => ['label' => 'Currency: '],
         ]);
+        
+        
         
         $this->add([
             'type' => 'Zend\Form\Element\Select',

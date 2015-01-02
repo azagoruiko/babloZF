@@ -9,7 +9,7 @@ return array(
     'modules' => array(
         'Bablo',
         'Rest',
-        //'ZendDeveloperTools',
+        'ZendDeveloperTools',
         'DoctrineModule',
         'DoctrineORMModule',
     ),

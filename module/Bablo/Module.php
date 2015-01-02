@@ -110,9 +110,11 @@ class Module
                     return $srv;
                 },
                 'Bablo\dao\CurrencyDAO' =>  function($sm) {
-                    $conn = $sm->get('MySQLConnection');
-                    $dao = new MysqlCurrencyDAO($conn);
-                    return $dao;
+                    //$conn = $sm->get('MySQLConnection');
+                    //$dao = new MysqlCurrencyDAO($conn);
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $srv = new Service\CurrencyServiceImpl($em, $em->getClassMetadata('\bablo\model\Currency'));
+                    return $srv;
                 },
                         
                 'AuthService' => function($sm) {
@@ -228,7 +230,7 @@ class Module
                 },
                 'Rest\dao\ExpenceDAO' =>  function($sm) {
                     $conn = $sm->get('MySQLConnection');
-                    $dao = new MysqlExpenceDAO($conn);
+                    $dao = new \bablo\dao\MysqlExpenceDAO($conn);
                     return $dao;
                 },
                 'Rest\dao\IncomeDAO' =>  function($sm) {

@@ -3,7 +3,7 @@ namespace bablo\model;
 
 use Doctrine\ORM\Mapping as ORM;
 /** 
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Bablo\Service\CurrencyServiceImpl")
  * @ORM\Table(name="bablo.currency") 
  */
 class Currency {
@@ -47,5 +47,19 @@ class Currency {
         $this->name = $name;
     }
 
+    public function toArray($withId = true, $withCustomFields = true) {
+        $customFields = ['currency', 'source', 'usdAmount'];
+        $array = [];
+        foreach ($this as $key => $value) {
+            if (($key !== 'id' || $withId) && (!in_array($key, $customFields) || $withCustomFields)) {
+                $array[$key] = $value;
+            }
+        }
+        return $array;
+    }
+    
+    public function __toString() {
+        return $this->name;
+    }
 
 }

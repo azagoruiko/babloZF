@@ -88,6 +88,7 @@ class DoctrineIncomeService implements IncomeService {
         $em = $this->getEm();
         $qb = $em->createQueryBuilder();
         $this->prepareIncomeSelect($qb);
+        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
         $this->addIncomeFiltersToSelect($qb, $filter);
         
         $adapter = new DoctrinePaginator(
@@ -99,19 +100,64 @@ class DoctrineIncomeService implements IncomeService {
     }
 
     public function getAnnualBalance($userId = 0, $year = null) {
+        $em = $this->getEm();
+        $qb = $em->createQueryBuilder();
+        $qb->select('SUM(i.amount * ra.rate) as usdAmount')
+                ->from('bablo\model\Income', 'i')
+                ->join('i.currency', 'c');
         
+        $subQ = $this->getEm()->createQueryBuilder();
+        $subQ->select('MAX(r.date)')->from('bablo\model\Rate', 'r');
+        
+        $qb->join('c.rates', 'ra', 'WITH', 'ra.date =(' . $subQ->getDQL() .')');
+        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $filter = new IncomeSearchFilter();
+        $filter->setMonthFrom("1,$year");
+        $filter->setMonthTo("12,$year");
+        
+        $this->addIncomeFiltersToSelect($qb, $filter);
+        return ['usdAmount' => $qb->getQuery()->getSingleScalarResult()];
     }
 
     public function getRevenueBrokenByMonth($userId = 0, $month = '', $year = '') {
+        if (empty($year)) {
+            $year = date('Y');
+        }
+        $em = $this->getEm();
+        $qb = $em->createQueryBuilder();
+        $this->getEm()->getConfiguration()->addCustomStringFunction('MONTH', 'Bablo\Doctrine\MonthFunc');
+        $this->getEm()->getConfiguration()->addCustomStringFunction('YEAR', 'Bablo\Doctrine\YearFunc');
+        $qb->select('SUM(i.amount * ra.rate) as balance, MONTH(i.date) as month, YEAR(i.date) as year')
+                ->from('bablo\model\Income', 'i')
+                ->join('i.currency', 'c');
         
+        $subQ = $this->getEm()->createQueryBuilder();
+        $subQ->select('MAX(r.date)')->from('bablo\model\Rate', 'r');
+        
+        $qb->join('c.rates', 'ra', 'WITH', 'ra.date =(' . $subQ->getDQL() .')');
+        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $qb->groupBy('month');
+        $filter = new IncomeSearchFilter();
+        $filter->setMonthFrom("1,$year");
+        $filter->setMonthTo("12,$year");
+        
+        $this->addIncomeFiltersToSelect($qb, $filter);
+        return $qb->getQuery()->getScalarResult();
     }
 
     public function getUpdates($userId = 0, $lastId = 0, IncomeSearchFilter $filter) {  
+        $em = $this->getEm();
+        $qb = $em->createQueryBuilder();
+        $this->prepareIncomeSelect($qb);
+        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $qb->andWhere($qb->expr()->gt("i.id", $lastId));
+        $this->addIncomeFiltersToSelect($qb, $filter);
+        return $qb->getQuery()->getResult();
     }
 
     public function save(Income $income) {
-        
+        $this->getEm()->persist($income);
+        $this->getEm()->flush();
     }
 
-//put your code here
 }

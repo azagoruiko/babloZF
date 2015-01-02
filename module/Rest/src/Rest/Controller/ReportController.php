@@ -34,10 +34,16 @@ class ReportController extends BaseAccountingController
         $view = new JsonModel();
         $month = date("m");
         $year = date("Y");
+        $filter = new IncomeSearchFilter();
+        $filter->setMonthFrom("$month,$year");
+        $filter->setMonthTo("$month,$year");
         $view->updates = $this->getIncomeService()->getUpdates(
                 $this->getAuthService()->getIdentity(), 
                 0,
-                $month, $year);
+                $filter);
+        foreach($view->updates as $u) {
+            $u->usdAmount = (int)$u->getUsdAmount();
+        }
         return $view;
     }
     

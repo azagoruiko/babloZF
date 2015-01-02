@@ -2,7 +2,9 @@
 
 namespace Bablo\Service;
 
-class CurrencyServiceImpl implements CurrencyService {
+use Doctrine\ORM\EntityRepository;
+
+class CurrencyServiceImpl extends EntityRepository implements CurrencyService {
     private $gw;
     private $cache;
     
@@ -37,6 +39,12 @@ class CurrencyServiceImpl implements CurrencyService {
 
     public function setRate($cureencyId, $rate, $date) {
         
+    }
+
+    public function findAll() {
+        $res = $this->_em->getRepository($this->getEntityName())->
+                createQueryBuilder('c')->getQuery()->getResult();
+        return $res;
     }
 
 }
