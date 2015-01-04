@@ -29,18 +29,19 @@ class DoctrineIncomeService implements IncomeService {
 
         
     public function delete($id) {
-        
+        $income = $this->getEm()->getPartialReference('bablo\model\Income', $id);
+        $this->getEm()->remove($income);
+        $this->getEm()->flush();
     }
 
     public function find($id) {
         
     }
 
-    private function prepareIncomeSelect(QueryBuilder $qb) {
-        $qb->select('i')
-                ->from('bablo\model\Income', 'i')
+    private function prepareIncomeSelect(QueryBuilder $qb, $userId) {
+        $qb->from('bablo\model\Income', 'i')
                 ->join('i.currency', 'c');
-        
+        $qb->andWhere($qb->expr()->eq("i.user_id", $userId));
         $subQ = $this->getEm()->createQueryBuilder();
         $subQ->select('MAX(r.date)')->from('bablo\model\Rate', 'r');
         
@@ -61,7 +62,7 @@ class DoctrineIncomeService implements IncomeService {
             $dateFrom = date('Y-m-d', mktime(0,0,0,$month, 1, $year));
             // WHERE ... income.date between [dateFrom] AND LAST_DAY([dateTo]) ...
             $this->getEm()->getConfiguration()->addCustomStringFunction('LAST_DAY', 'Bablo\Doctrine\LastDayFunc');
-            $qb->where($qb->expr()->between('i.date', ':dateFrom', 'LAST_DAY(:dateTo)'));
+            $qb->andWhere($qb->expr()->between('i.date', ':dateFrom', 'LAST_DAY(:dateTo)'));
             $qb->setParameter('dateFrom', $dateFrom);
             $qb->setParameter('dateTo', $dateTo);
         }
@@ -87,8 +88,8 @@ class DoctrineIncomeService implements IncomeService {
     public function findAll($userId, IncomeSearchFilter $filter, $page=1, $count=10) {
         $em = $this->getEm();
         $qb = $em->createQueryBuilder();
-        $this->prepareIncomeSelect($qb);
-        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $qb->select('i');
+        $this->prepareIncomeSelect($qb, $userId);
         $this->addIncomeFiltersToSelect($qb, $filter);
         
         $adapter = new DoctrinePaginator(
@@ -102,15 +103,8 @@ class DoctrineIncomeService implements IncomeService {
     public function getAnnualBalance($userId = 0, $year = null) {
         $em = $this->getEm();
         $qb = $em->createQueryBuilder();
-        $qb->select('SUM(i.amount * ra.rate) as usdAmount')
-                ->from('bablo\model\Income', 'i')
-                ->join('i.currency', 'c');
-        
-        $subQ = $this->getEm()->createQueryBuilder();
-        $subQ->select('MAX(r.date)')->from('bablo\model\Rate', 'r');
-        
-        $qb->join('c.rates', 'ra', 'WITH', 'ra.date =(' . $subQ->getDQL() .')');
-        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $qb->select('SUM(i.amount * ra.rate) as usdAmount');
+        $this->prepareIncomeSelect($qb, $userId);
         $filter = new IncomeSearchFilter();
         $filter->setMonthFrom("1,$year");
         $filter->setMonthTo("12,$year");
@@ -127,15 +121,8 @@ class DoctrineIncomeService implements IncomeService {
         $qb = $em->createQueryBuilder();
         $this->getEm()->getConfiguration()->addCustomStringFunction('MONTH', 'Bablo\Doctrine\MonthFunc');
         $this->getEm()->getConfiguration()->addCustomStringFunction('YEAR', 'Bablo\Doctrine\YearFunc');
-        $qb->select('SUM(i.amount * ra.rate) as balance, MONTH(i.date) as month, YEAR(i.date) as year')
-                ->from('bablo\model\Income', 'i')
-                ->join('i.currency', 'c');
-        
-        $subQ = $this->getEm()->createQueryBuilder();
-        $subQ->select('MAX(r.date)')->from('bablo\model\Rate', 'r');
-        
-        $qb->join('c.rates', 'ra', 'WITH', 'ra.date =(' . $subQ->getDQL() .')');
-        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $qb->select('SUM(i.amount * ra.rate) as balance, MONTH(i.date) as month, YEAR(i.date) as year');
+        $this->prepareIncomeSelect($qb, $userId);
         $qb->groupBy('month');
         $filter = new IncomeSearchFilter();
         $filter->setMonthFrom("1,$year");
@@ -148,8 +135,9 @@ class DoctrineIncomeService implements IncomeService {
     public function getUpdates($userId = 0, $lastId = 0, IncomeSearchFilter $filter) {  
         $em = $this->getEm();
         $qb = $em->createQueryBuilder();
-        $this->prepareIncomeSelect($qb);
-        $qb->andWhere($qb->expr()->eq("i.user.id", $userId));
+        $qb->select('i');
+        $this->prepareIncomeSelect($qb, $userId);
+        
         $qb->andWhere($qb->expr()->gt("i.id", $lastId));
         $this->addIncomeFiltersToSelect($qb, $filter);
         return $qb->getQuery()->getResult();
